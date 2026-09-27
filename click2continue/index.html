@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Guest Wi-Fi Access</title>
+  <style>
+    :root {
+      --primary: #0f172a;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 380px;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
+      padding: 32px 24px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .wifi-icon {
+      width: 48px;
+      height: 48px;
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    p.subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    input[type="email"] {
+      width: 100%;
+      height: 44px;
+      padding: 0 12px;
+      font-size: 15px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      outline: none;
+      background-color: #fff;
+      transition: border-color 0.15s ease;
+    }
+
+    input[type="email"]:focus {
+      border-color: var(--accent);
+    }
+
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .checkbox-group input {
+      margin-top: 2px;
+      accent-color: var(--accent);
+    }
+
+    button {
+      width: 100%;
+      height: 44px;
+      background-color: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.15s ease;
+    }
+
+    button:hover {
+      background-color: var(--accent-hover);
+    }
+
+    button:active {
+      transform: scale(0.99);
+    }
+
+    .footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Debug Accordion */
+    details.debug-box {
+      margin-top: 16px;
+      padding: 10px 12px;
+      background: #f1f5f9;
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: left;
+    }
+
+    details.debug-box summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+      user-select: none;
+      outline: none;
+    }
+
+    .debug-table {
+      width: 100%;
+      margin-top: 8px;
+      border-collapse: collapse;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      word-break: break-all;
+    }
+
+    .debug-table td {
+      padding: 3px 0;
+      vertical-align: top;
+    }
+
+    .debug-table td.key {
+      font-weight: 600;
+      color: var(--accent);
+      width: 35%;
+      padding-right: 6px;
+    }
+
+    .debug-table td.val {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <!-- Minimalist WiFi SVG Icon -->
+      <svg class="wifi-icon" viewBox="0 0 24 24">
+        <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+        <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+        <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+        <line x1="12" y1="20" x2="12.01" y2="20"></line>
+      </svg>
+      <h1>Guest Wi-Fi Network</h1>
+      <p class="subtitle">Please provide your email to continue</p>
+    </div>
+
+    <form id="portal-form" method="POST" action="/cgi-bin/login.sh">
+      <!-- Hidden fields populated from openNDS query parameters -->
+      <input type="hidden" name="clientmac" id="clientmac">
+      <input type="hidden" name="clientip" id="clientip">
+      <input type="hidden" name="gatewayurl" id="gatewayurl">
+      <input type="hidden" name="hid" id="hid">
+      <input type="hidden" name="gatewayname" id="gatewayname">
+
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          placeholder="name@example.com" 
+          required 
+          autocomplete="email" 
+          autocapitalize="none"
+          spellcheck="false"
+        >
+      </div>
+
+      <div class="checkbox-group">
+        <input type="checkbox" id="tos" required checked>
+        <label for="tos">I accept the terms of service and agree to fair network usage.</label>
+      </div>
+
+      <button type="submit" id="submit-btn">Connect to Internet</button>
+    </form>
+
+    <!-- Collapsible Query Parameter Debug Info -->
+    <details class="debug-box">
+      <summary>Debug: Query Parameters (<span id="debug-param-count">0</span>)</summary>
+      <table class="debug-table">
+        <tbody id="debug-table-body">
+          <tr><td colspan="2" style="font-style: italic;">No parameters detected</td></tr>
+        </tbody>
+      </table>
+    </details>
+
+    <div class="footer">
+      <span id="display-mac">Device: Loading...</span>
+      <span>Secure Gateway</span>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const parsedData = {};
+
+      // 1. Check if openNDS sent a packed Base64 "fas" parameter
+      const fasRaw = urlParams.get('fas');
+      if (fasRaw) {
+        try {
+          // Decode Base64 and clean up trailing (null) strings
+          const cleanFas = atob(fasRaw).replace(/\(null\)/g, '');
+          
+          // Split on comma-space: "key1=val1, key2=val2"
+          cleanFas.split(',').forEach(pair => {
+            const idx = pair.indexOf('=');
+            if (idx > -1) {
+              const k = pair.substring(0, idx).trim();
+              const v = decodeURIComponent(pair.substring(idx + 1).trim());
+              if (k) parsedData[k] = v;
+            }
+          });
+        } catch (e) {
+          console.error("Failed to decode FAS Base64 parameter:", e);
+        }
+      }
+
+      // 2. Also incorporate any regular URL parameters
+      for (const [k, v] of urlParams.entries()) {
+        if (k !== 'fas') parsedData[k] = v;
+      }
+
+      // 3. Helper to fetch fields with fallbacks
+      const getVal = (key) => parsedData[key] || '';
+
+      const clientMac = getVal('clientmac');
+      const clientIp = getVal('clientip');
+      const gatewayUrl = getVal('gatewayurl');
+      const hid = getVal('hid');
+      const gatewayName = getVal('gatewayname') || 'Guest Wi-Fi';
+
+      // 4. Populate hidden form fields
+      if (document.getElementById('clientmac')) document.getElementById('clientmac').value = clientMac;
+      if (document.getElementById('clientip')) document.getElementById('clientip').value = clientIp;
+      if (document.getElementById('gatewayurl')) document.getElementById('gatewayurl').value = gatewayUrl;
+      if (document.getElementById('hid')) document.getElementById('hid').value = hid;
+      if (document.getElementById('gatewayname')) document.getElementById('gatewayname').value = gatewayName;
+
+      // 5. Populate Debug Collapsible Table
+      const debugCount = document.getElementById('debug-param-count');
+      const debugBody = document.getElementById('debug-table-body');
+      const entries = Object.entries(parsedData);
+
+      if (entries.length > 0 && debugBody) {
+        if (debugCount) debugCount.textContent = entries.length;
+        debugBody.innerHTML = '';
+        entries.forEach(([key, val]) => {
+          const row = document.createElement('tr');
+          row.innerHTML = `<td class="key">${escapeHtml(key)}</td><td class="val">${escapeHtml(val)}</td>`;
+          debugBody.appendChild(row);
+        });
+      }
+
+      function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, m => ({
+          '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[m]));
+      }
+
+      // 6. Update display MAC
+      const macDisplay = document.getElementById('display-mac');
+      if (macDisplay) {
+        macDisplay.textContent = clientMac ? clientMac.toUpperCase() : 'Direct Connect';
+      }
+
+      // 7. Form submission feedback
+      const form = document.getElementById('portal-form');
+      const submitBtn = document.getElementById('submit-btn');
+      if (form && submitBtn) {
+        form.addEventListener('submit', function() {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Connecting...';
+          submitBtn.style.opacity = '0.7';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
