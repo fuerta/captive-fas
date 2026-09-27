@@ -20,7 +20,6 @@ get_param() {
     urldecode "$raw_val"
 }
 
-EMAIL=$(get_param "email")
 CLIENT_MAC=$(get_param "clientmac")
 CLIENT_IP=$(get_param "clientip")
 GATEWAY_URL=$(get_param "gatewayurl")
@@ -36,20 +35,7 @@ elif [ -n "$CLIENT_IP" ]; then
     ndsctl auth "$CLIENT_IP" "$SESSION_DURATION" >/dev/null 2>&1
 fi
 
-# 5. Dispatch async webhook to Google Apps Script
-GOOGLE_WEBHOOK_URL="https://script.google.com/macros/s/AKfycb...YOUR_SCRIPT_ID.../exec"
-
-if [ -n "$EMAIL" ]; then
-    CLEAN_EMAIL=$(echo "$EMAIL" | tr -d '"\\')
-    JSON_PAYLOAD=$(printf '{"email":"%s","mac":"%s","ip":"%s"}' "$CLEAN_EMAIL" "$CLIENT_MAC" "$CLIENT_IP")
-
-    curl -s -L -m 5 \
-         -H "Content-Type: application/json" \
-         -d "$JSON_PAYLOAD" \
-         "$GOOGLE_WEBHOOK_URL" > /dev/null 2>&1 &
-fi
-
-# 6. Success response
+# 5. Success response
 cat <<EOF
 <!DOCTYPE html>
 <html lang="en">
