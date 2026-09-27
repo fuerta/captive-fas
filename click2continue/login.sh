@@ -220,53 +220,56 @@ cat <<'EOF'
 
   <script>
     (function() {
-      // 1. Measure live latency & ping Apple probe
-      const pingStart = performance.now();
-      const appleProbe = new Image();
-      appleProbe.src = "https://captive.apple.com/hotspot-detect.html?" + Date.now();
-      appleProbe.onload = appleProbe.onerror = function() {
-        const latency = Math.round(performance.now() - pingStart);
-        const pingEl = document.getElementById('wan-ping');
-        if (pingEl) pingEl.textContent = latency + ' ms';
-      };
+      // 1100ms delay to ensure openNDS & kernel firewall rules are active
+      setTimeout(runDiagnostics, 1100);
 
-      // 2. Fetch Public IP and Location via Cloudflare Trace (Fast, TLS, CORS-friendly)
-      fetch('https://1.1.1.1/cdn-cgi/trace')
-        .then(response => response.text())
-        .then(data => {
-          const lines = data.split('\n');
-          const trace = {};
-          lines.forEach(line => {
-            const parts = line.split('=');
-            if (parts.length === 2) trace[parts[0]] = parts[1];
+      function runDiagnostics() {
+        const pingStart = performance.now();
+
+        // Fetch trace directly from Cloudflare (HTTPS, CORS-enabled, minimal payload)
+        fetch('https://1.1.1.1/cdn-cgi/trace', { cache: 'no-store' })
+          .then(response => {
+            // Calculate round-trip link latency to the nearest Anycast edge
+            const latency = Math.round(performance.now() - pingStart);
+            const pingEl = document.getElementById('wan-ping');
+            if (pingEl) pingEl.textContent = latency + ' ms';
+            return response.text();
+          })
+          .then(text => {
+            const lines = text.split('\n');
+            const trace = {};
+            lines.forEach(line => {
+              const parts = line.split('=');
+              if (parts.length === 2) trace[parts[0]] = parts[1];
+            });
+
+            // Display Public IP
+            const ipEl = document.getElementById('wan-ip');
+            if (ipEl && trace.ip) {
+              ipEl.textContent = trace.ip;
+            }
+
+            // Display Edge Location (Airport/Colo Code, e.g. LHR, DUB, MAD)
+            const locEl = document.getElementById('wan-loc');
+            if (locEl && trace.loc) {
+              locEl.textContent = trace.loc + ' Edge (' + (trace.colo || 'WAN') + ')';
+            }
+          })
+          .catch(() => {
+            // Graceful fallback if Cloudflare is unreachable
+            const ipEl = document.getElementById('wan-ip');
+            const locEl = document.getElementById('wan-loc');
+            const pingEl = document.getElementById('wan-ping');
+
+            if (ipEl) ipEl.textContent = 'Active (Protected)';
+            if (locEl) locEl.textContent = 'Online';
+            if (pingEl) pingEl.textContent = 'OK';
           });
 
-          if (trace.ip) {
-            document.getElementById('wan-ip').textContent = trace.ip;
-          }
-          if (trace.loc) {
-            document.getElementById('wan-loc').textContent = trace.loc + ' Edge (' + (trace.colo || 'WAN') + ')';
-          }
-        })
-        .catch(() => {
-          // Fallback to ipify if Cloudflare trace is blocked
-          fetch('https://api.ipify.org?format=json')
-            .then(res => res.json())
-            .then(data => {
-              document.getElementById('wan-ip').textContent = data.ip;
-              document.getElementById('wan-loc').textContent = 'Verified WAN';
-            })
-            .catch(() => {
-              document.getElementById('wan-ip').textContent = 'Active (Protected)';
-              document.getElementById('wan-loc').textContent = 'Online';
-            });
-        });
-
-      // 3. Android / generic connectivity check fallback
-      const gProbe = new Image();
-      gProbe.src = "http://connectivitycheck.gstatic.com/generate_204?" + Date.now();
+      }
     })();
   </script>
+
 </body>
 </html>
 EOF
