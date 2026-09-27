@@ -37,7 +37,7 @@ fi
 # 5. Success response
 printf "Content-Type: text/html; charset=utf-8\r\n\r\n"
 
-cat <<'EOF'
+cat <<EOF
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -236,7 +236,7 @@ cat <<'EOF'
             return response.text();
           })
           .then(text => {
-            const lines = text.split('\n');
+            const lines = text.split('\\n');
             const trace = {};
             lines.forEach(line => {
               const parts = line.split('=');
