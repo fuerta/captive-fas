@@ -1,5 +1,4 @@
 #!/bin/sh
-printf "Content-Type: text/html; charset=utf-8\r\n\r\n"
 
 # 1. Read POST payload safely in BusyBox
 POST_BODY=""
@@ -25,7 +24,7 @@ CLIENT_IP=$(get_param "clientip")
 GATEWAY_URL=$(get_param "gatewayurl")
 
 # Configuration
-LANDING_URL="https://prokop.dev"
+LANDING_URL="https://info.fizjoterapia.uk"
 SESSION_DURATION="1440" # 24 hours in minutes
 
 # 4. Authenticate client by MAC or IP via ndsctl
@@ -36,55 +35,238 @@ elif [ -n "$CLIENT_IP" ]; then
 fi
 
 # 5. Success response
-cat <<EOF
+printf "Content-Type: text/html; charset=utf-8\r\n\r\n"
+
+cat <<'EOF'
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Connected</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Connected to Internet</title>
   <style>
+    :root {
+      --primary: #0f172a;
+      --accent: #2563eb;
+      --success: #16a34a;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f8fafc;
-      color: #0f172a;
+      background-color: var(--bg);
+      color: var(--text);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      margin: 0;
       padding: 16px;
     }
-    .card {
-      background: #fff;
-      max-width: 360px;
+
+    .container {
       width: 100%;
-      border-radius: 12px;
+      max-width: 380px;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--border);
       padding: 32px 24px;
       text-align: center;
-      border: 1px solid #e2e8f0;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
-    h2 { font-size: 18px; margin-bottom: 8px; color: #16a34a; }
-    p { font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 20px; }
-    a.btn {
-      display: block;
-      text-decoration: none;
-      background: #2563eb;
-      color: #fff;
-      padding: 12px 20px;
-      border-radius: 8px;
-      font-size: 14px;
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      background: #dcfce7;
+      color: var(--success);
+      font-size: 13px;
       font-weight: 600;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background-color: var(--success);
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.2);
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    p.subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin: 8px 0 24px 0;
+      line-height: 1.4;
+    }
+
+    /* Network Diagnostics Card */
+    .net-card {
+      background: #f1f5f9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 24px;
+      text-align: left;
+    }
+
+    .net-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .net-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .net-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .net-val {
+      font-family: ui-monospace, Menlo, monospace;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .btn-action {
+      display: block;
+      width: 100%;
+      height: 44px;
+      line-height: 44px;
+      background-color: var(--accent);
+      color: #ffffff;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-action:hover {
+      background-color: #1d4ed8;
+    }
+
+    .ios-hint {
+      margin-top: 14px;
+      font-size: 11px;
+      color: var(--text-muted);
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Access Granted</h2>
-    <p>You are now connected to the internet. Tap Done in the top corner or continue below.</p>
-    <a href="${LANDING_URL}" class="btn" target="_blank">Continue to prokop.dev</a>
+
+  <div class="container">
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      Online &amp; Active
+    </div>
+
+    <h1>Internet Connected</h1>
+    <p class="subtitle">Your device is authenticated. On Apple devices, tap <strong>Done</strong> in the top-right corner to start browsing.</p>
+
+    <!-- Visual Network Info Widget -->
+    <div class="net-card">
+      <div class="net-row">
+        <span class="net-label">Public IP</span>
+        <span class="net-val" id="wan-ip"><span class="pulse">Detecting...</span></span>
+      </div>
+      <div class="net-row">
+        <span class="net-label">Location</span>
+        <span class="net-val" id="wan-loc"><span class="pulse">Locating...</span></span>
+      </div>
+      <div class="net-row">
+        <span class="net-label">Link Latency</span>
+        <span class="net-val" id="wan-ping"><span class="pulse">Measuring...</span></span>
+      </div>
+    </div>
+
+    <!-- Direct Action Button -->
+    <a href="${LANDING_URL}" class="btn-action">
+      Finish &amp; Browse
+    </a>
+
+    <p class="ios-hint">Tap "Done" at top right to return to your apps.</p>
   </div>
+
+  <script>
+    (function() {
+      // 1. Measure live latency & ping Apple probe
+      const pingStart = performance.now();
+      const appleProbe = new Image();
+      appleProbe.src = "https://captive.apple.com/hotspot-detect.html?" + Date.now();
+      appleProbe.onload = appleProbe.onerror = function() {
+        const latency = Math.round(performance.now() - pingStart);
+        const pingEl = document.getElementById('wan-ping');
+        if (pingEl) pingEl.textContent = latency + ' ms';
+      };
+
+      // 2. Fetch Public IP and Location via Cloudflare Trace (Fast, TLS, CORS-friendly)
+      fetch('https://1.1.1.1/cdn-cgi/trace')
+        .then(response => response.text())
+        .then(data => {
+          const lines = data.split('\n');
+          const trace = {};
+          lines.forEach(line => {
+            const parts = line.split('=');
+            if (parts.length === 2) trace[parts[0]] = parts[1];
+          });
+
+          if (trace.ip) {
+            document.getElementById('wan-ip').textContent = trace.ip;
+          }
+          if (trace.loc) {
+            document.getElementById('wan-loc').textContent = trace.loc + ' Edge (' + (trace.colo || 'WAN') + ')';
+          }
+        })
+        .catch(() => {
+          // Fallback to ipify if Cloudflare trace is blocked
+          fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(data => {
+              document.getElementById('wan-ip').textContent = data.ip;
+              document.getElementById('wan-loc').textContent = 'Verified WAN';
+            })
+            .catch(() => {
+              document.getElementById('wan-ip').textContent = 'Active (Protected)';
+              document.getElementById('wan-loc').textContent = 'Online';
+            });
+        });
+
+      // 3. Android / generic connectivity check fallback
+      const gProbe = new Image();
+      gProbe.src = "http://connectivitycheck.gstatic.com/generate_204?" + Date.now();
+    })();
+  </script>
 </body>
 </html>
 EOF
