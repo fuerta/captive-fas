@@ -72,47 +72,48 @@
       margin-top: 6px;
     }
 
-    .form-group {
-      margin-bottom: 16px;
+    .terms-box {
+      background-color: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      max-height: 140px;
+      overflow-y: auto;
       text-align: left;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      -webkit-overflow-scrolling: touch;
     }
 
-    label {
-      display: block;
-      font-size: 13px;
-      font-weight: 500;
+    .terms-box h4 {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .terms-box p {
       margin-bottom: 6px;
     }
 
-    input[type="email"] {
-      width: 100%;
-      height: 44px;
-      padding: 0 12px;
-      font-size: 15px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      outline: none;
-      background-color: #fff;
-      transition: border-color 0.15s ease;
+    .terms-box p:last-child {
+      margin-bottom: 0;
     }
 
-    input[type="email"]:focus {
-      border-color: var(--accent);
+    .terms-box strong {
+      color: var(--text);
     }
 
-    .checkbox-group {
-      display: flex;
-      align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 20px;
+    .terms-notice {
       font-size: 12px;
       color: var(--text-muted);
       line-height: 1.4;
-    }
-
-    .checkbox-group input {
-      margin-top: 2px;
-      accent-color: var(--accent);
+      margin-bottom: 18px;
+      text-align: center;
     }
 
     button {
@@ -203,7 +204,7 @@
         <line x1="12" y1="20" x2="12.01" y2="20"></line>
       </svg>
       <h1>Guest Wi-Fi Network</h1>
-      <p class="subtitle">Please provide your email to continue</p>
+      <p class="subtitle">Terms of Service &amp; Fair Use Policy</p>
     </div>
 
     <form id="portal-form" method="POST" action="/cgi-bin/login.sh">
@@ -214,26 +215,19 @@
       <input type="hidden" name="hid" id="hid">
       <input type="hidden" name="gatewayname" id="gatewayname">
 
-      <div class="form-group">
-        <label for="email">Email Address</label>
-        <input 
-          type="email" 
-          id="email" 
-          name="email" 
-          placeholder="name@example.com" 
-          required 
-          autocomplete="email" 
-          autocapitalize="none"
-          spellcheck="false"
-        >
+      <div class="terms-box">
+        <h4>Guest Wi-Fi Terms of Use</h4>
+        <p>1. <strong>Lawful Use:</strong> You agree not to use this network for any unlawful, harassing, or harmful activities.</p>
+        <p>2. <strong>Fair Bandwidth:</strong> Network bandwidth is shared among all guests. Automated abuse or excessive torrent/P2P traffic may be restricted.</p>
+        <p>3. <strong>Wireless Security:</strong> This is an open wireless network. Please ensure your device firewall and sensitive traffic (HTTPS/VPN) are protected.</p>
+        <p>4. <strong>Disclaimer:</strong> Access is provided complimentary "as is" without guarantees of speed, reliability, or uninterrupted connectivity.</p>
       </div>
 
-      <div class="checkbox-group">
-        <input type="checkbox" id="tos" required checked>
-        <label for="tos">I accept the terms of service and agree to fair network usage.</label>
-      </div>
+      <p class="terms-notice">
+        By clicking below, you agree to comply with our Terms of Use and Acceptable Use Policy.
+      </p>
 
-      <button type="submit" id="submit-btn">Connect to Internet</button>
+      <button type="submit" id="submit-btn">Accept &amp; Connect</button>
     </form>
 
     <!-- Collapsible Query Parameter Debug Info -->
